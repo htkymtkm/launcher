@@ -111,11 +111,13 @@
     flex-shrink:0;margin-right:12px;
   }
   .move-col{
-    display:flex;flex-direction:column;flex-shrink:0;margin-left:8px;
+    display:flex;flex-direction:row;flex-shrink:0;margin-left:8px;gap:2px;
   }
   .move-col button{
-    border:none;background:none;color:var(--label-2);
-    font-size:13px;line-height:1;padding:5px 8px;
+    width:24px;height:24px;
+    border:none;background:var(--bg);border-radius:7px;
+    color:var(--label-2);font-size:12px;line-height:1;padding:0;
+    display:flex;align-items:center;justify-content:center;
   }
   .move-col button:disabled{opacity:0.2;}
 
