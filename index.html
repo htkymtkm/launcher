@@ -76,17 +76,21 @@
   }
 
   .row{
-    display:flex;align-items:center;
+    display:flex;align-items:stretch;
     background:var(--bg-row);
     border-radius:14px;
-    padding:0 10px 0 16px;
     min-height:0;
     box-shadow:0 1px 2px rgba(60,60,67,0.06);
     border:1px solid var(--sep);
+    overflow:hidden;
   }
-  .row .dot-color{
-    width:10px;height:10px;border-radius:50%;
-    flex-shrink:0;margin-right:12px;
+  .row .color-strip{
+    width:8px;flex-shrink:0;
+  }
+  .row .row-content{
+    flex:1;display:flex;align-items:center;
+    padding:0 10px 0 14px;
+    min-width:0;
   }
   .row .title{
     flex:1;
@@ -179,7 +183,7 @@
 <body>
 <div id="app">
   <div class="topbar">
-    <h1>マイランチャー</h1>
+    <h1>Launcher</h1>
     <div class="topbar-actions">
       <button class="icon-btn plus" @click="openAddSheet">＋</button>
       <button class="icon-btn" @click="toggleEdit">{{ editMode ? '完了' : '編集' }}</button>
@@ -198,13 +202,15 @@
         v-for="item in page"
         :key="item.id"
       >
-        <div class="del-circle" v-if="editMode" @click="removeItem(item)">−</div>
-        <div class="dot-color" v-else :style="{background:item.color}"></div>
-        <div class="title" @click="onTitleClick(item)">{{ item.title }}</div>
-        <span class="chevron" v-if="!editMode" @click="onTitleClick(item)">›</span>
-        <div class="move-col" v-if="editMode">
-          <button :disabled="globalIndex(item)===0" @click="move(item,-1)">▲</button>
-          <button :disabled="globalIndex(item)===items.length-1" @click="move(item,1)">▼</button>
+        <div class="color-strip" :style="{background:item.color}"></div>
+        <div class="row-content">
+          <div class="del-circle" v-if="editMode" @click="removeItem(item)">−</div>
+          <div class="title" @click="onTitleClick(item)">{{ item.title }}</div>
+          <span class="chevron" v-if="!editMode" @click="onTitleClick(item)">›</span>
+          <div class="move-col" v-if="editMode">
+            <button :disabled="globalIndex(item)===0" @click="move(item,-1)">▲</button>
+            <button :disabled="globalIndex(item)===items.length-1" @click="move(item,1)">▼</button>
+          </div>
         </div>
       </div>
     </div>
