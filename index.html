@@ -4,20 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Launcher">
-<meta name="theme-color" content="#101014">
+<meta name="theme-color" content="#F2F2F7">
 <title>マイランチャー</title>
 <style>
   :root{
-    --bg:#101014;
-    --bg-elevated:#1c1c22;
-    --bg-sheet:#1c1c22;
-    --sep:rgba(255,255,255,0.08);
-    --label:#f5f5f7;
-    --label-2:#98989f;
-    --danger:#ff453a;
-    --radius-icon:26%;
+    --bg:#F2F2F7;
+    --bg-elevated:#FFFFFF;
+    --bg-row:#FFFFFF;
+    --bg-row-active:#E9E9EC;
+    --sep:rgba(60,60,67,0.12);
+    --label:#1C1C1E;
+    --label-2:#8A8A8E;
+    --accent:#007AFF;
+    --danger:#FF3B30;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{
@@ -29,100 +30,108 @@
     -webkit-user-select:none;user-select:none;
   }
   #app{
-    min-height:100%;
-    padding-top:calc(env(safe-area-inset-top) + 18px);
-    padding-bottom:calc(env(safe-area-inset-bottom) + 24px);
-    padding-left:calc(env(safe-area-inset-left) + 20px);
-    padding-right:calc(env(safe-area-inset-right) + 20px);
+    height:100%;
+    padding-top:calc(env(safe-area-inset-top) + 14px);
+    padding-bottom:calc(env(safe-area-inset-bottom) + 10px);
+    padding-left:calc(env(safe-area-inset-left) + 16px);
+    padding-right:calc(env(safe-area-inset-right) + 16px);
     display:flex;flex-direction:column;
   }
   .topbar{
     display:flex;align-items:center;justify-content:space-between;
-    margin-bottom:22px;
+    margin-bottom:14px;flex-shrink:0;
   }
   .topbar h1{
     font-size:15px;font-weight:600;color:var(--label-2);
     letter-spacing:0.02em;margin:0;
   }
-  .edit-btn{
-    background:none;border:none;color:#0A84FF;
-    font-size:15px;font-weight:600;padding:6px 4px;
+  .topbar-actions{display:flex;align-items:center;gap:18px;}
+  .icon-btn{
+    background:none;border:none;color:var(--accent);
+    font-size:15px;font-weight:600;padding:4px;
+    display:flex;align-items:center;justify-content:center;
   }
+  .icon-btn.plus{font-size:24px;font-weight:400;line-height:1;padding:0 2px;}
+
   .empty-hint{
     color:var(--label-2);font-size:13px;text-align:center;
-    margin-top:60px;line-height:1.7;
+    margin-top:60px;line-height:1.7;flex-shrink:0;
   }
-  .grid{
+
+  .pager{
+    flex:1;
+    display:flex;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+  }
+  .pager::-webkit-scrollbar{display:none;}
+  .page{
+    flex:0 0 100%;
+    scroll-snap-align:start;
     display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:22px 8px;
+    grid-template-rows:repeat(8, 1fr);
+    gap:9px;
+    padding-bottom:4px;
   }
-  .tile-wrap{
-    position:relative;
-    display:flex;flex-direction:column;align-items:center;
-    animation-duration:0.26s;animation-iteration-count:infinite;
+
+  .row{
+    display:flex;align-items:center;
+    background:var(--bg-row);
+    border-radius:14px;
+    padding:0 10px 0 16px;
+    min-height:0;
+    box-shadow:0 1px 2px rgba(60,60,67,0.06);
+    border:1px solid var(--sep);
   }
-  .tile-wrap.jiggle:nth-child(odd){animation-name:wobbleA;}
-  .tile-wrap.jiggle:nth-child(even){animation-name:wobbleB;animation-duration:0.22s;}
-  @keyframes wobbleA{
-    0%,100%{transform:rotate(-1.5deg);}
-    50%{transform:rotate(1.5deg);}
+  .row .dot-color{
+    width:10px;height:10px;border-radius:50%;
+    flex-shrink:0;margin-right:12px;
   }
-  @keyframes wobbleB{
-    0%,100%{transform:rotate(1.6deg);}
-    50%{transform:rotate(-1.6deg);}
-  }
-  .icon{
-    width:58px;height:58px;border-radius:var(--radius-icon);
-    display:flex;align-items:center;justify-content:center;
-    font-size:26px;
-    background-image:linear-gradient(160deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 45%);
-    box-shadow:0 1px 3px rgba(0,0,0,0.4), inset 0 0 0 0.5px rgba(255,255,255,0.08);
-    transition:transform 0.1s ease;
-    position:relative;
-  }
-  .tile-wrap:not(.jiggle) .icon:active{transform:scale(0.90);}
-  .label{
-    margin-top:6px;font-size:11px;color:var(--label);
-    text-align:center;max-width:64px;
+  .row .title{
+    flex:1;
+    font-size:16px;font-weight:500;color:var(--label);
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
-  .add-icon{
-    background:none;
-    box-shadow:none;
-    border:1.5px dashed rgba(255,255,255,0.25);
-    color:rgba(255,255,255,0.35);
-    font-size:24px;font-weight:300;
+  .row .chevron{
+    color:var(--label-2);font-size:15px;padding:0 6px 0 4px;
   }
-  .del-badge{
-    position:absolute;top:-6px;left:-6px;
-    width:22px;height:22px;border-radius:50%;
-    background:var(--danger);
-    color:#fff;font-size:14px;line-height:1;font-weight:700;
+  .row:active{background:var(--bg-row-active);}
+
+  .row.edit-row .title{padding-left:0;}
+  .del-circle{
+    width:24px;height:24px;border-radius:50%;
+    background:var(--danger);color:#fff;
+    font-size:17px;line-height:1;font-weight:700;
     display:flex;align-items:center;justify-content:center;
-    box-shadow:0 1px 3px rgba(0,0,0,0.5);
-    z-index:2;
+    flex-shrink:0;margin-right:12px;
   }
-  .reorder-row{
-    display:flex;gap:4px;margin-top:5px;
+  .move-col{
+    display:flex;flex-direction:column;flex-shrink:0;margin-left:8px;
   }
-  .reorder-row button{
-    width:22px;height:18px;
-    border:none;border-radius:6px;
-    background:rgba(255,255,255,0.12);
-    color:var(--label);font-size:11px;
-    display:flex;align-items:center;justify-content:center;
-    padding:0;
+  .move-col button{
+    border:none;background:none;color:var(--label-2);
+    font-size:13px;line-height:1;padding:5px 8px;
   }
-  .reorder-row button:disabled{opacity:0.25;}
+  .move-col button:disabled{opacity:0.2;}
+
+  .dots{
+    display:flex;justify-content:center;gap:7px;
+    padding-top:10px;flex-shrink:0;
+  }
+  .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:rgba(60,60,67,0.22);
+  }
+  .dot.active{background:var(--label-2);}
 
   /* bottom sheet */
   .sheet-backdrop{
-    position:fixed;inset:0;background:rgba(0,0,0,0.5);
+    position:fixed;inset:0;background:rgba(0,0,0,0.35);
     display:flex;align-items:flex-end;z-index:10;
   }
   .sheet{
-    width:100%;background:var(--bg-sheet);
+    width:100%;background:var(--bg-elevated);
     border-radius:20px 20px 0 0;
     padding:14px 20px calc(env(safe-area-inset-bottom) + 20px);
     animation:slideUp 0.22s ease-out;
@@ -130,7 +139,7 @@
   @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
   .sheet-handle{
     width:36px;height:5px;border-radius:3px;
-    background:rgba(255,255,255,0.25);
+    background:rgba(60,60,67,0.2);
     margin:0 auto 16px;
   }
   .sheet h2{font-size:17px;margin:0 0 16px;font-weight:600;}
@@ -139,35 +148,31 @@
     display:block;font-size:12px;color:var(--label-2);margin-bottom:6px;
   }
   .field input{
-    width:100%;background:var(--bg-elevated);
+    width:100%;background:var(--bg);
     border:1px solid var(--sep);border-radius:10px;
     padding:11px 12px;color:var(--label);font-size:15px;
     -webkit-user-select:text;user-select:text;
   }
-  .field input:focus{outline:none;border-color:#0A84FF;}
-  .field.emoji-field input{width:70px;text-align:center;font-size:20px;}
-  .swatches{display:flex;gap:10px;flex-wrap:wrap;}
-  .swatch{
-    width:32px;height:32px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .swatch .ring{
-    width:38px;height:38px;border-radius:50%;
+  .field input:focus{outline:none;border-color:var(--accent);}
+  .swatches{display:flex;gap:14px;padding:2px 0;}
+  .swatch-ring{
+    width:36px;height:36px;border-radius:50%;
     display:flex;align-items:center;justify-content:center;
     border:2px solid transparent;
   }
-  .swatch .ring.selected{border-color:#fff;}
+  .swatch-ring.selected{border-color:var(--label-2);}
+  .swatch-fill{width:26px;height:26px;border-radius:50%;}
   .sheet-actions{display:flex;gap:10px;margin-top:20px;}
   .sheet-actions button{
     flex:1;padding:13px;border:none;border-radius:12px;
     font-size:15px;font-weight:600;
   }
-  .btn-cancel{background:var(--bg-elevated);color:var(--label);}
-  .btn-save{background:#0A84FF;color:#fff;}
+  .btn-cancel{background:var(--bg);color:var(--label);}
+  .btn-save{background:var(--accent);color:#fff;}
   .btn-save:disabled{opacity:0.4;}
   .btn-delete{
     width:100%;margin-top:10px;padding:13px;border:none;border-radius:12px;
-    background:rgba(255,69,58,0.15);color:var(--danger);font-size:15px;font-weight:600;
+    background:rgba(255,59,48,0.1);color:var(--danger);font-size:15px;font-weight:600;
   }
 </style>
 </head>
@@ -175,69 +180,59 @@
 <div id="app">
   <div class="topbar">
     <h1>マイランチャー</h1>
-    <button class="edit-btn" @click="toggleEdit">{{ editMode ? '完了' : '編集' }}</button>
+    <div class="topbar-actions">
+      <button class="icon-btn plus" @click="openAddSheet">＋</button>
+      <button class="icon-btn" @click="toggleEdit">{{ editMode ? '完了' : '編集' }}</button>
+    </div>
   </div>
 
   <p class="empty-hint" v-if="items.length===0">
-    右下の「＋」から、よく使うURLを登録してください。<br>
-    アイコンを長押し（0.5秒）すると編集モードに入れます。
+    右上の「＋」から、よく使うURLを登録してください。
   </p>
 
-  <div class="grid" v-else>
-    <div
-      class="tile-wrap"
-      :class="{jiggle: editMode}"
-      v-for="(item, index) in items"
-      :key="item.id"
-      @touchstart="startPress(item)"
-      @touchend="cancelPress"
-      @touchmove="cancelPress"
-      @mousedown="startPress(item)"
-      @mouseup="cancelPress"
-      @mouseleave="cancelPress"
-    >
-      <div class="del-badge" v-if="editMode" @click.stop="removeItem(index)">×</div>
-      <div class="icon" :style="{background: item.color}" @click="onTileClick(item)">
-        {{ iconContent(item) }}
-      </div>
-      <div class="label">{{ item.title }}</div>
-      <div class="reorder-row" v-if="editMode">
-        <button :disabled="index===0" @click.stop="move(index,-1)">◀</button>
-        <button :disabled="index===items.length-1" @click.stop="move(index,1)">▶</button>
+  <div class="pager" ref="pager" @scroll="onScroll" v-else>
+    <div class="page" v-for="(page, pIndex) in pages" :key="pIndex">
+      <div
+        class="row"
+        :class="{'edit-row': editMode}"
+        v-for="item in page"
+        :key="item.id"
+      >
+        <div class="del-circle" v-if="editMode" @click="removeItem(item)">−</div>
+        <div class="dot-color" v-else :style="{background:item.color}"></div>
+        <div class="title" @click="onTitleClick(item)">{{ item.title }}</div>
+        <span class="chevron" v-if="!editMode" @click="onTitleClick(item)">›</span>
+        <div class="move-col" v-if="editMode">
+          <button :disabled="globalIndex(item)===0" @click="move(item,-1)">▲</button>
+          <button :disabled="globalIndex(item)===items.length-1" @click="move(item,1)">▼</button>
+        </div>
       </div>
     </div>
+  </div>
 
-    <div class="tile-wrap" @click="openAddSheet">
-      <div class="icon add-icon">＋</div>
-      <div class="label">追加</div>
-    </div>
+  <div class="dots" v-if="pages.length>1">
+    <div class="dot" v-for="(p,i) in pages" :key="i" :class="{active:i===currentPage}"></div>
   </div>
 
   <!-- Add / Edit sheet -->
   <div class="sheet-backdrop" v-if="sheetOpen" @click.self="closeSheet">
     <div class="sheet">
       <div class="sheet-handle"></div>
-      <h2>{{ editingItem ? 'アイコンを編集' : '新しいアイコンを追加' }}</h2>
+      <h2>{{ editingItem ? 'バーを編集' : '新しいバーを追加' }}</h2>
 
       <div class="field">
         <label>タイトル</label>
-        <input type="text" v-model="form.title" placeholder="例: Gmail" maxlength="12">
+        <input type="text" v-model="form.title" placeholder="例: Gmail" maxlength="20">
       </div>
       <div class="field">
         <label>URL</label>
         <input type="url" v-model="form.url" placeholder="example.com またはhttps://...">
       </div>
-      <div class="field emoji-field">
-        <label>絵文字（任意）</label>
-        <input type="text" v-model="form.emoji" placeholder="🔗" maxlength="2">
-      </div>
       <div class="field">
         <label>カラー</label>
         <div class="swatches">
-          <div class="swatch" v-for="c in palette" :key="c" @click="form.color=c">
-            <div class="ring" :class="{selected: form.color===c}">
-              <div style="width:28px;height:28px;border-radius:50%;" :style="{background:c}"></div>
-            </div>
+          <div class="swatch-ring" v-for="c in palette" :key="c" :class="{selected: form.color===c}" @click="form.color=c">
+            <div class="swatch-fill" :style="{background:c}"></div>
           </div>
         </div>
       </div>
@@ -246,15 +241,16 @@
         <button class="btn-cancel" @click="closeSheet">キャンセル</button>
         <button class="btn-save" :disabled="!canSave" @click="saveItem">保存</button>
       </div>
-      <button class="btn-delete" v-if="editingItem" @click="removeEditingItem">このアイコンを削除</button>
+      <button class="btn-delete" v-if="editingItem" @click="removeEditingItem">このバーを削除</button>
     </div>
   </div>
 </div>
 
 <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 <script>
-const STORAGE_KEY = 'ios_launcher_items_v1';
-const PALETTE = ['#0A84FF','#30D158','#FF9F0A','#FF375F','#BF5AF2','#64D2FF','#FF453A','#FFD60A'];
+const STORAGE_KEY = 'ios_launcher_items_v3';
+const PAGE_SIZE = 8;
+const PALETTE = ['#007AFF','#34C759','#FF9500','#FF2D55','#AF52DE'];
 
 const { createApp } = Vue;
 
@@ -265,14 +261,22 @@ createApp({
       editMode: false,
       sheetOpen: false,
       editingItem: null,
-      form: { title:'', url:'', emoji:'', color: PALETTE[0] },
+      form: { title:'', url:'', color: PALETTE[0] },
       palette: PALETTE,
-      pressTimer: null,
+      currentPage: 0,
     };
   },
   computed: {
     canSave(){
       return this.form.title.trim().length>0 && this.form.url.trim().length>0;
+    },
+    pages(){
+      const out = [];
+      for(let i=0;i<this.items.length;i+=PAGE_SIZE){
+        out.push(this.items.slice(i, i+PAGE_SIZE));
+      }
+      if(out.length===0) out.push([]);
+      return out;
     }
   },
   methods: {
@@ -285,9 +289,6 @@ createApp({
     save(){
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.items));
     },
-    iconContent(item){
-      return item.emoji && item.emoji.trim() ? item.emoji : item.title.charAt(0).toUpperCase();
-    },
     normalizeUrl(url){
       url = url.trim();
       if(!/^https?:\/\//i.test(url)){
@@ -295,7 +296,7 @@ createApp({
       }
       return url;
     },
-    onTileClick(item){
+    onTitleClick(item){
       if(this.editMode){
         this.openEditSheet(item);
       } else {
@@ -305,39 +306,32 @@ createApp({
     toggleEdit(){
       this.editMode = !this.editMode;
     },
-    startPress(item){
-      this.cancelPress();
-      this.pressTimer = setTimeout(()=>{
-        this.editMode = true;
-        this.pressTimer = null;
-      }, 500);
+    globalIndex(item){
+      return this.items.findIndex(i=>i.id===item.id);
     },
-    cancelPress(){
-      if(this.pressTimer){
-        clearTimeout(this.pressTimer);
-        this.pressTimer = null;
-      }
-    },
-    move(index, dir){
+    move(item, dir){
+      const index = this.globalIndex(item);
       const target = index + dir;
       if(target<0 || target>=this.items.length) return;
       const arr = this.items;
       [arr[index], arr[target]] = [arr[target], arr[index]];
       this.save();
     },
-    removeItem(index){
-      if(!confirm(this.items[index].title + ' を削除しますか？')) return;
-      this.items.splice(index,1);
+    removeItem(item){
+      if(!confirm(item.title + ' を削除しますか？')) return;
+      const idx = this.globalIndex(item);
+      if(idx>-1) this.items.splice(idx,1);
       this.save();
     },
     openAddSheet(){
       this.editingItem = null;
-      this.form = { title:'', url:'', emoji:'', color: PALETTE[Math.floor(Math.random()*PALETTE.length)] };
+      const nextColor = PALETTE[this.items.length % PALETTE.length];
+      this.form = { title:'', url:'', color: nextColor };
       this.sheetOpen = true;
     },
     openEditSheet(item){
       this.editingItem = item;
-      this.form = { title:item.title, url:item.url, emoji:item.emoji||'', color:item.color };
+      this.form = { title:item.title, url:item.url, color:item.color };
       this.sheetOpen = true;
     },
     closeSheet(){
@@ -350,14 +344,12 @@ createApp({
       if(this.editingItem){
         this.editingItem.title = this.form.title.trim();
         this.editingItem.url = url;
-        this.editingItem.emoji = this.form.emoji.trim();
         this.editingItem.color = this.form.color;
       } else {
         this.items.push({
           id: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
           title: this.form.title.trim(),
           url: url,
-          emoji: this.form.emoji.trim(),
           color: this.form.color,
         });
       }
@@ -367,17 +359,20 @@ createApp({
     removeEditingItem(){
       if(!this.editingItem) return;
       if(!confirm(this.editingItem.title + ' を削除しますか？')) return;
-      const idx = this.items.findIndex(i=>i.id===this.editingItem.id);
+      const idx = this.globalIndex(this.editingItem);
       if(idx>-1) this.items.splice(idx,1);
       this.save();
       this.closeSheet();
+    },
+    onScroll(){
+      const el = this.$refs.pager;
+      if(!el) return;
+      const w = el.clientWidth;
+      if(w>0) this.currentPage = Math.round(el.scrollLeft / w);
     }
   },
   mounted(){
     this.load();
-    document.addEventListener('touchmove', (e)=>{
-      if(this.sheetOpen) return;
-    }, {passive:true});
   }
 }).mount('#app');
 </script>
