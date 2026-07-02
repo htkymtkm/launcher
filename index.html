@@ -256,9 +256,10 @@
 
 <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 <script>
-const STORAGE_KEY = 'ios_launcher_items_v3';
 const PAGE_SIZE = 8;
 const PALETTE = ['#007AFF','#34C759','#FF9500','#FF2D55','#AF52DE'];
+const PROFILE = new URLSearchParams(location.search).get('profile') || 'default';
+const STORAGE_KEY = 'ios_launcher_items_v3_' + PROFILE;
 
 const { createApp } = Vue;
 
